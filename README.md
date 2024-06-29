@@ -1,8 +1,6 @@
 # NestJS Query Helpers
 
-## Overview
-
-NPM package providing query utilities for NestJS applications, including easily configurable decorators for pagination, sorting, and filtering. This library simplifies the handling of HTTP request parameters for these functionalities, ensuring robust and maintainable code.
+Provides query utilities for NestJS applications, including easily configurable decorators for pagination, sorting, and filtering. This library simplifies the handling of HTTP request parameters for these functionalities, ensuring robust and maintainable code.
 
 ## Features
 
