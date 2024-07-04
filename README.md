@@ -11,7 +11,7 @@ Provides query utilities for NestJS applications, including easily configurable 
 ## Installation
 
 ```bash
-npm install library-template
+npm install nestjs-query-helpers
 ```
 
 ## Usage
@@ -78,7 +78,7 @@ export class ItemsController {
     })
     filters: Filtering[]
   ) {
-    // Use [{ property, rule, value }, ...] from `filters`
+    // Use { property: { [rule]: value }, ...} from `filters`
   }
 }
 ```

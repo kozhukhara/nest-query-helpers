@@ -8,9 +8,7 @@ import { FastifyRequest } from 'fastify';
 import { RequestQuery } from '~common';
 
 export interface Filtering {
-  property: string;
-  rule: string;
-  value: string;
+  [property: string]: Record<string, any>;
 }
 
 export enum FilterRule {
@@ -36,13 +34,13 @@ export interface FilteringDecoratorOptions {
 }
 
 export const FilteringParams = createParamDecorator(
-  (options: FilteringDecoratorOptions, ctx: ExecutionContext): Filtering[] => {
+  (options: FilteringDecoratorOptions, ctx: ExecutionContext): Filtering => {
     const req: ExpressRequest | FastifyRequest = ctx
       .switchToHttp()
       .getRequest();
     const filters = (req.query as RequestQuery).filters;
 
-    const parseFilter = (filter): Filtering | null => {
+    const parseFilter = (filter: string): Filtering | null => {
       if (!filter) return null;
 
       if (
@@ -60,14 +58,26 @@ export const FilteringParams = createParamDecorator(
         !options.allowedFields.includes(property)
       )
         throw new BadRequestException(`Invalid filter property: ${property}`);
-      if (options.allowedRules?.length && !options.allowedRules.includes(rule))
+      if (!Object.values(FilterRule).includes(rule as FilterRule)) {
         throw new BadRequestException(`Invalid filter rule: ${rule}`);
+      }
+      if (
+        options.allowedRules?.length &&
+        !options.allowedRules.includes(rule as FilterRule)
+      )
+        throw new BadRequestException(`Filter rule \`${rule}\` not allowed`);
 
-      return { property, rule, value };
+      return { [property]: { [rule as FilterRule]: value } };
     };
 
-    return (Array.isArray(filters) ? filters : [filters])
+    const parsedFilters = (Array.isArray(filters) ? filters : [filters])
       .map(parseFilter)
-      .filter((f) => !!f);
+      .filter((f): f is Filtering => !!f);
+
+    return parsedFilters.reduce((acc, curr) => {
+      const key = Object.keys(curr)[0];
+      acc[key] = curr[key];
+      return acc;
+    }, {} as Filtering);
   }
 );
